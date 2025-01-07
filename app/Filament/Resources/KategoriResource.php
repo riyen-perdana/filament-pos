@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use stdClass;
 use Filament\Forms;
 use Filament\Tables;
 use Filament\Forms\Set;
@@ -10,6 +11,7 @@ use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Illuminate\Support\Str;
 use Filament\Resources\Resource;
+use Filament\Tables\Contracts\HasTable;
 use Filament\Forms\Components\Section;
 use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\KategoriResource\Pages;
@@ -41,7 +43,7 @@ class KategoriResource extends Resource
                     ]),
                 Forms\Components\TextInput::make('kategori_slug')
                     ->required()
-                    ->disabled()
+                    ->readOnly()
                     ->label('Kategori Slug')
                     ->validationMessages([
                         'required' => 'Kolom Kategori Slug Harus Diisi'
@@ -65,14 +67,36 @@ class KategoriResource extends Resource
             ->emptyStateHeading('Data Tidak Ditemukan')
             ->emptyStateDescription('Kami Sudah Mencari Keseluruh Sumber Data, Namun Data Tidak Ditemukan')
             ->columns([
-                //
+                Tables\Columns\TextColumn::make('index')->state(
+                    static function (HasTable $livewire, stdClass $rowLoop): string {
+                        return (string) (
+                            $rowLoop->iteration +
+                            ($livewire->getTableRecordsPerPage() * (
+                                $livewire->getTablePage() - 1
+                            )).'.'
+                        );
+                    }
+                )
+                    ->label('No.')
+                    ->width('3%'),
+                Tables\Columns\TextColumn::make('kategori_nama')
+                    ->label('Nama Kategori')
+                    ->searchable()
+                    ->sortable()
+                    ->width('90%'),
+                Tables\Columns\TextColumn::make('is_aktif')
+                    ->label('Status Kategori')
+                    ->searchable()
+                    ->badge()
+                    ->formatStateUsing(fn ($record) => $record->is_aktif->value == 'Y' ? 'Aktif' : 'Tidak Aktif')
+                    ->color(fn ($record) => $record->is_aktif->value == 'Y' ? 'success' : 'danger')
             ])
             ->filters([
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\EditAction::make()->label('Ubah'),
+                Tables\Actions\DeleteAction::make()->label('Hapus'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

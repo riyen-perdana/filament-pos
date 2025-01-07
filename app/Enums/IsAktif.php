@@ -4,6 +4,6 @@ namespace App\Enums;
 
 enum IsAktif: string
 {
-    case Y = 'Aktif';
-    case N = 'Non Aktif';
+    case Y = 'Y';
+    case N = 'N';
 }

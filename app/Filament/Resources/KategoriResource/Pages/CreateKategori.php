@@ -6,6 +6,7 @@ use App\Filament\Resources\KategoriResource;
 use Filament\Actions;
 use Filament\Actions\Action;
 use Filament\Resources\Pages\CreateRecord;
+use Filament\Notifications\Notification;
 
 class CreateKategori extends CreateRecord
 {
@@ -35,5 +36,13 @@ class CreateKategori extends CreateRecord
             ->color('danger')
             ->icon('heroicon-o-x-mark')
             ->extraAttributes(['onclick' => 'window.history.back()']);
+    }
+
+    protected function getCreatedNotification(): ?Notification
+    {
+        return Notification::make()
+            ->success()
+            ->title('Sukses')
+            ->body('Data Kategori Berhasil Ditambahka');
     }
 }
