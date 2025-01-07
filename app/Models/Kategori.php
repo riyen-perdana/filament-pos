@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Enums\IsAktif;
 use Illuminate\Database\Eloquent\Model;
 
 class Kategori extends Model
 {
     protected $table = 'kategori';
     protected $fillable = ['kategori_nama', 'kategori_slug', 'is_aktif'];
+    
     protected $casts = ['is_aktif' => IsAktif::class];
 
     protected function kategoriNama(): Attribute
