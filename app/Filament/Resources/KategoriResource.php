@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources;
 
-use stdClass;
+use App\Enums\IsAktif;
 use Filament\Forms;
 use Filament\Tables;
 use Filament\Forms\Set;
@@ -11,15 +11,17 @@ use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Illuminate\Support\Str;
 use Filament\Resources\Resource;
-use Filament\Tables\Contracts\HasTable;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Filters\Filter;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
+use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\KategoriResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\KategoriResource\RelationManagers;
-use Filament\Notifications\Notification;
-
-use function Livewire\before;
+use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\CheckboxList;
 
 class KategoriResource extends Resource
 {
@@ -47,15 +49,17 @@ class KategoriResource extends Resource
                         'unique' => 'Kolom Nama Kategori Sudah Digunakan, Isikan Yang Lain'
                     ]),
                 Forms\Components\TextInput::make('kategori_slug')
-                    ->hidden(),
+                    ->readOnly(true),
                 Forms\Components\Select::make('is_aktif')
                     ->required()
                     ->placeholder('Pilih Status Kategori')
-                    ->default('Y')
                     ->label('Status Kategori')
                     ->options([
                         'Y' => 'Aktif',
                         'N' => 'Tidak Aktif'
+                    ])
+                    ->validationMessages([
+                        'required' => 'Kolom Status Kategori Harus Diisi',
                     ])
             ]);
     }
@@ -67,16 +71,8 @@ class KategoriResource extends Resource
             ->emptyStateHeading('Data Tidak Ditemukan')
             ->emptyStateDescription('Kami Sudah Mencari Keseluruh Sumber Data, Namun Data Tidak Ditemukan')
             ->columns([
-                Tables\Columns\TextColumn::make('index')->state(
-                    static function (HasTable $livewire, stdClass $rowLoop): string {
-                        return (string) (
-                            $rowLoop->iteration +
-                            ($livewire->getTableRecordsPerPage() * (
-                                $livewire->getTablePage() - 1
-                            )).'.'
-                        );
-                    }
-                )
+                Tables\Columns\TextColumn::make('index')
+                    ->rowIndex()
                     ->label('No.')
                     ->width('3%'),
                 Tables\Columns\TextColumn::make('kategori_nama')
@@ -88,22 +84,45 @@ class KategoriResource extends Resource
                     ->label('Status Kategori')
                     ->searchable()
                     ->badge()
-                    ->formatStateUsing(fn ($record) => $record->is_aktif->value == 'Y' ? 'Aktif' : 'Tidak Aktif')
-                    ->color(fn ($record) => $record->is_aktif->value == 'Y' ? 'success' : 'danger')
+                    ->formatStateUsing(fn($record) => $record->is_aktif->value == 'Y' ? 'Aktif' : 'Tidak Aktif')
+                    ->color(fn($record) => $record->is_aktif->value == 'Y' ? 'success' : 'danger')
             ])
             ->filters([
-                //
+                Filter::make('filter')
+                    ->form([
+                        Select::make('is_aktif')
+                            ->options([
+                                'Y' => 'Aktif',
+                                'N' => 'Tidak Aktif'
+                            ])
+                            ->label('Status Kategori')
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        return $query->when(
+                            $data['is_aktif'],
+                                fn(Builder $query) => $query->where('is_aktif', $data['is_aktif'])
+                        );
+                    })
             ])
             ->actions([
                 Tables\Actions\EditAction::make()->label('Ubah'),
                 Tables\Actions\DeleteAction::make()
                     ->label('Hapus')
+                    ->requiresConfirmation()
                     ->successNotification(
                         Notification::make()
                             ->success()
                             ->title('Sukses')
                             ->body('Data Kategori Berhasil Dihapus')
                     )
+                    ->after(
+                        fn() =>
+                        redirect(KategoriResource::getUrl('index'))
+                    )
+                    ->modalHeading(fn(Kategori $record) => 'Hapus Kategori ' . $record->kategori_nama . '')
+                    ->modalDescription('Apakah Anda Yakin Menghapus Data Ini?')
+                    ->modalCancelActionLabel('Tidak')
+                    ->modalSubmitActionLabel('Ya, Hapus Data')
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -127,4 +146,10 @@ class KategoriResource extends Resource
             'edit' => Pages\EditKategori::route('/{record}/edit'),
         ];
     }
+
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
+    }
+    
 }
