@@ -10,6 +10,10 @@ use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Illuminate\Support\Str;
 use Filament\Resources\Resource;
+use Filament\Tables\Filters\Filter;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Tabs\Tab;
+use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\JabatanResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -62,13 +66,58 @@ class JabatanResource extends Resource
             ->emptyStateHeading('Data Tidak Ditemukan')
             ->emptyStateDescription('Kami Sudah Mencari Keseluruh Sumber Data, Namun Data Tidak Ditemukan')
             ->columns([
-                //
+                Tables\Columns\TextColumn::make('index')
+                    ->rowIndex()
+                    ->label('No.')
+                    ->width('3%'),
+                Tables\Columns\TextColumn::make('jabatan_nama')
+                    ->label('Nama Jabatan')
+                    ->searchable()
+                    ->sortable()
+                    ->width('90%'),
+                Tables\Columns\TextColumn::make('is_aktif')
+                    ->label('Status Kategori')
+                    ->searchable()
+                    ->badge()
+                    ->formatStateUsing(fn($record) => $record->is_aktif->value == 'Y' ? 'Aktif' : 'Tidak Aktif')
+                    ->color(fn($record) => $record->is_aktif->value == 'Y' ? 'success' : 'danger')
             ])
             ->filters([
-                //
+                Filter::make('filter')
+                    ->form([
+                        Select::make('is_aktif')
+                            ->options([
+                                'Y' => 'Aktif',
+                                'N' => 'Tidak Aktif'
+                            ])
+                            ->label('Status Jabatan')
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        return $query->when(
+                            $data['is_aktif'],
+                                fn(Builder $query) => $query->where('is_aktif', $data['is_aktif'])
+                        );
+                    })
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()->label('Ubah'),
+                Tables\Actions\DeleteAction::make()
+                ->label('Hapus')
+                    ->requiresConfirmation()
+                    ->successNotification(
+                        Notification::make()
+                            ->success()
+                            ->title('Sukses')
+                            ->body('Data Jabatan Berhasil Dihapus')
+                    )
+                    ->after(
+                        fn() =>
+                        redirect(JabatanResource::getUrl('index'))
+                    )
+                    ->modalHeading(fn(Jabatan $record) => 'Hapus Jabatan ' . $record->jabatan_nama . '')
+                    ->modalDescription('Apakah Anda Yakin Menghapus Data Ini?')
+                    ->modalCancelActionLabel('Tidak')
+                    ->modalSubmitActionLabel('Ya, Hapus Data')
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
