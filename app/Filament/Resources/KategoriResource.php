@@ -17,6 +17,9 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\KategoriResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\KategoriResource\RelationManagers;
+use Filament\Notifications\Notification;
+
+use function Livewire\before;
 
 class KategoriResource extends Resource
 {
@@ -35,19 +38,16 @@ class KategoriResource extends Resource
                 Forms\Components\TextInput::make('kategori_nama')
                     ->autofocus()
                     ->required()
+                    ->unique(ignoreRecord: true)
                     ->label('Nama Kategori')
                     ->live(onBlur: true)
                     ->afterStateUpdated(fn(Set $set, ?string $state) => $set('kategori_slug', Str::slug($state)))
                     ->validationMessages([
-                        'required' => 'Kolom Nama Kategori Harus Diisi'
+                        'required' => 'Kolom Nama Kategori Harus Diisi',
+                        'unique' => 'Kolom Nama Kategori Sudah Digunakan, Isikan Yang Lain'
                     ]),
                 Forms\Components\TextInput::make('kategori_slug')
-                    ->required()
-                    ->readOnly()
-                    ->label('Kategori Slug')
-                    ->validationMessages([
-                        'required' => 'Kolom Kategori Slug Harus Diisi'
-                    ]),
+                    ->hidden(),
                 Forms\Components\Select::make('is_aktif')
                     ->required()
                     ->placeholder('Pilih Status Kategori')
@@ -96,7 +96,14 @@ class KategoriResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make()->label('Ubah'),
-                Tables\Actions\DeleteAction::make()->label('Hapus'),
+                Tables\Actions\DeleteAction::make()
+                    ->label('Hapus')
+                    ->successNotification(
+                        Notification::make()
+                            ->success()
+                            ->title('Sukses')
+                            ->body('Data Kategori Berhasil Dihapus')
+                    )
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
