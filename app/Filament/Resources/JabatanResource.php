@@ -2,9 +2,11 @@
 
 namespace App\Filament\Resources;
 
+use Closure;
 use Filament\Forms;
 use Filament\Tables;
 use App\Models\Jabatan;
+use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
@@ -39,12 +41,25 @@ class JabatanResource extends Resource
                 ->label('Nama Jabatan')
                 ->live(onBlur: true)
                 ->afterStateUpdated(fn(Set $set, ?string $state) => $set('jabatan_slug', Str::slug($state)))
+                // ->rule(
+                //     fn (Get $get): Closure => function (string $attribute, $value, Closure $fail) use ($get) {
+                //         $slug = Jabatan::where('jabatan_slug', $get('jabatan_slug'))->first();
+                //         if ($slug) {
+                //             $fail("Kolom Nama Jabatan Sudah Digunakan, Isikan Yang Lain");
+                //         }
+                //     }
+                // )
                 ->validationMessages([
                     'required' => 'Kolom Nama Jabatan Harus Diisi',
                     'unique' => 'Kolom Nama Jabatan Sudah Digunakan, Isikan Yang Lain'
                 ]),
             Forms\Components\TextInput::make('jabatan_slug')
-                ->readOnly(true),
+                ->readOnly(true)
+                ->unique(ignoreRecord: true)
+                ->label('Slug')
+                ->validationMessages([
+                    'unique' => 'Kolom Nama Jabatan Sudah Digunakan, Isikan Yang Lain'
+                ]),
             Forms\Components\Select::make('is_aktif')
                 ->required()
                 ->placeholder('Pilih Status Jabatan')
@@ -82,23 +97,23 @@ class JabatanResource extends Resource
                     ->formatStateUsing(fn($record) => $record->is_aktif->value == 'Y' ? 'Aktif' : 'Tidak Aktif')
                     ->color(fn($record) => $record->is_aktif->value == 'Y' ? 'success' : 'danger')
             ])
-            ->filters([
-                Filter::make('filter')
-                    ->form([
-                        Select::make('is_aktif')
-                            ->options([
-                                'Y' => 'Aktif',
-                                'N' => 'Tidak Aktif'
-                            ])
-                            ->label('Status Jabatan')
-                    ])
-                    ->query(function (Builder $query, array $data) {
-                        return $query->when(
-                            $data['is_aktif'],
-                                fn(Builder $query) => $query->where('is_aktif', $data['is_aktif'])
-                        );
-                    })
-            ])
+            // ->filters([
+            //     Filter::make('filter')
+            //         ->form([
+            //             Select::make('is_aktif')
+            //                 ->options([
+            //                     'Y' => 'Aktif',
+            //                     'N' => 'Tidak Aktif'
+            //                 ])
+            //                 ->label('Status Jabatan')
+            //         ])
+            //         ->query(function (Builder $query, array $data) {
+            //             return $query->when(
+            //                 $data['is_aktif'],
+            //                     fn(Builder $query) => $query->where('is_aktif', $data['is_aktif'])
+            //             );
+            //         })
+            // ])
             ->actions([
                 Tables\Actions\EditAction::make()->label('Ubah'),
                 Tables\Actions\DeleteAction::make()

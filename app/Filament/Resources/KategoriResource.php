@@ -87,23 +87,23 @@ class KategoriResource extends Resource
                     ->formatStateUsing(fn($record) => $record->is_aktif->value == 'Y' ? 'Aktif' : 'Tidak Aktif')
                     ->color(fn($record) => $record->is_aktif->value == 'Y' ? 'success' : 'danger')
             ])
-            ->filters([
-                Filter::make('filter')
-                    ->form([
-                        Select::make('is_aktif')
-                            ->options([
-                                'Y' => 'Aktif',
-                                'N' => 'Tidak Aktif'
-                            ])
-                            ->label('Status Kategori')
-                    ])
-                    ->query(function (Builder $query, array $data) {
-                        return $query->when(
-                            $data['is_aktif'],
-                                fn(Builder $query) => $query->where('is_aktif', $data['is_aktif'])
-                        );
-                    })
-            ])
+            // ->filters([
+            //     Filter::make('filter')
+            //         ->form([
+            //             Select::make('is_aktif')
+            //                 ->options([
+            //                     'Y' => 'Aktif',
+            //                     'N' => 'Tidak Aktif'
+            //                 ])
+            //                 ->label('Status Kategori')
+            //         ])
+            //         ->query(function (Builder $query, array $data) {
+            //             return $query->when(
+            //                 $data['is_aktif'],
+            //                     fn(Builder $query) => $query->where('is_aktif', $data['is_aktif'])
+            //             );
+            //         })
+            // ])
             ->actions([
                 Tables\Actions\EditAction::make()->label('Ubah'),
                 Tables\Actions\DeleteAction::make()

@@ -43,6 +43,6 @@ class CreateJabatan extends CreateRecord
         return Notification::make()
             ->success()
             ->title('Sukses')
-            ->body('Data Jabatan Berhasil Ditambahka');
+            ->body('Data Jabatan Berhasil Ditambahkan');
     }
 }
