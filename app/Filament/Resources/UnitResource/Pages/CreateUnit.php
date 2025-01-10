@@ -2,9 +2,10 @@
 
 namespace App\Filament\Resources\UnitResource\Pages;
 
-use App\Filament\Resources\UnitResource;
 use Filament\Actions;
 use Filament\Actions\Action;
+use App\Filament\Resources\UnitResource;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateUnit extends CreateRecord
@@ -26,5 +27,22 @@ class CreateUnit extends CreateRecord
             ->color('success')
             ->icon('heroicon-o-plus')
             ->submit('create');
+    }
+
+    protected function getCancelFormAction(): Action
+    {
+        return Actions\Action::make('cancel')
+            ->label('Batal')
+            ->color('danger')
+            ->icon('heroicon-o-x-mark')
+            ->extraAttributes(['onclick' => 'window.history.back()']);
+    }
+
+    protected function getCreatedNotification(): ?Notification
+    {
+        return Notification::make()
+            ->success()
+            ->title('Sukses')
+            ->body('Data Unit Berhasil Ditambahkan');
     }
 }

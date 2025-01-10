@@ -7,6 +7,7 @@ use Filament\Actions;
 use Filament\Resources\Components\Tab;
 use App\Filament\Resources\UnitResource;
 use Filament\Resources\Pages\ListRecords;
+use Illuminate\Database\Eloquent\Builder;
 
 class ListUnits extends ListRecords
 {
