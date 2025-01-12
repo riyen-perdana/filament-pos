@@ -33,45 +33,7 @@ class JabatanResource extends Resource
     public static function form(Form $form): Form
     {
         return $form
-        ->schema([
-            Forms\Components\TextInput::make('jabatan_nama')
-                ->autofocus()
-                ->required()
-                ->unique(ignoreRecord: true)
-                ->label('Nama Jabatan')
-                ->live(onBlur: true)
-                ->afterStateUpdated(fn(Set $set, ?string $state) => $set('jabatan_slug', Str::slug($state)))
-                // ->rule(
-                //     fn (Get $get): Closure => function (string $attribute, $value, Closure $fail) use ($get) {
-                //         $slug = Jabatan::where('jabatan_slug', $get('jabatan_slug'))->first();
-                //         if ($slug) {
-                //             $fail("Kolom Nama Jabatan Sudah Digunakan, Isikan Yang Lain");
-                //         }
-                //     }
-                // )
-                ->validationMessages([
-                    'required' => 'Kolom Nama Jabatan Harus Diisi',
-                    'unique' => 'Kolom Nama Jabatan Sudah Digunakan, Isikan Yang Lain'
-                ]),
-            Forms\Components\TextInput::make('jabatan_slug')
-                ->readOnly(true)
-                ->unique(ignoreRecord: true)
-                ->label('Slug')
-                ->validationMessages([
-                    'unique' => 'Kolom Nama Jabatan Sudah Digunakan, Isikan Yang Lain'
-                ]),
-            Forms\Components\Select::make('is_aktif')
-                ->required()
-                ->placeholder('Pilih Status Jabatan')
-                ->label('Status Jabatan')
-                ->options([
-                    'Y' => 'Aktif',
-                    'N' => 'Tidak Aktif'
-                ])
-                ->validationMessages([
-                    'required' => 'Kolom Status Jabatan Harus Diisi',
-                ])
-        ]);
+            ->schema(self::getCustomJabatanForm());
     }
 
     public static function table(Table $table): Table
@@ -117,7 +79,7 @@ class JabatanResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make()->label('Ubah'),
                 Tables\Actions\DeleteAction::make()
-                ->label('Hapus')
+                    ->label('Hapus')
                     ->requiresConfirmation()
                     ->successNotification(
                         Notification::make()
@@ -154,6 +116,49 @@ class JabatanResource extends Resource
             'index' => Pages\ListJabatans::route('/'),
             'create' => Pages\CreateJabatan::route('/create'),
             'edit' => Pages\EditJabatan::route('/{record}/edit'),
+        ];
+    }
+
+    public static function getCustomJabatanForm()
+    {
+        return [
+            Forms\Components\TextInput::make('jabatan_nama')
+                ->autofocus()
+                ->required()
+                ->unique(ignoreRecord: true)
+                ->label('Nama Jabatan')
+                ->live(onBlur: true)
+                ->afterStateUpdated(fn(Set $set, ?string $state) => $set('jabatan_slug', Str::slug($state)))
+                // ->rule(
+                //     fn (Get $get): Closure => function (string $attribute, $value, Closure $fail) use ($get) {
+                //         $slug = Jabatan::where('jabatan_slug', $get('jabatan_slug'))->first();
+                //         if ($slug) {
+                //             $fail("Kolom Nama Jabatan Sudah Digunakan, Isikan Yang Lain");
+                //         }
+                //     }
+                // )
+                ->validationMessages([
+                    'required' => 'Kolom Nama Jabatan Harus Diisi',
+                    'unique' => 'Kolom Nama Jabatan Sudah Digunakan, Isikan Yang Lain'
+                ]),
+            Forms\Components\TextInput::make('jabatan_slug')
+                ->readOnly(true)
+                ->unique(ignoreRecord: true)
+                ->label('Slug')
+                ->validationMessages([
+                    'unique' => 'Kolom Nama Jabatan Sudah Digunakan, Isikan Yang Lain'
+                ]),
+            Forms\Components\Select::make('is_aktif')
+                ->required()
+                ->placeholder('Pilih Status Jabatan')
+                ->label('Status Jabatan')
+                ->options([
+                    'Y' => 'Aktif',
+                    'N' => 'Tidak Aktif'
+                ])
+                ->validationMessages([
+                    'required' => 'Kolom Status Jabatan Harus Diisi',
+                ])
         ];
     }
 }

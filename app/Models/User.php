@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Enums\IsAktif;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -24,7 +25,7 @@ class User extends Authenticatable
         'no_hp',
         'password',
         'glr_dpn',
-        'glr_blkg',
+        'glr_blkgg',
         'is_aktif',
         'jabatan_id',
         'unit_id',
@@ -50,6 +51,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_aktif' => IsAktif::class
         ];
     }
 
@@ -59,13 +61,13 @@ class User extends Authenticatable
     {
         if ($this->glr_dpn == NULL || strlen(trim($this->glr_dpn) == 0))
         {
-            return "{$this->name}.{$this->glr_blk}";
-        } elseif ($this->glr_blk == NULL || strlen(trim($this->glr_blk) == 0))
+            return "{$this->name}.{$this->glr_blkg}";
+        } elseif ($this->glr_blkg == NULL || strlen(trim($this->glr_blkg) == 0))
         {
             return "{$this->glr_dpn}. {$this->name}";
-        } elseif (($this->glr_dpn != NULL || strlen(trim($this->glr_dpn) != 0)) && ($this->glr_blk != null || strlen(trim($this->glr_blk) != 0)))
+        } elseif (($this->glr_dpn != NULL || strlen(trim($this->glr_dpn) != 0)) && ($this->glr_blkg != null || strlen(trim($this->glr_blkg) != 0)))
         {
-            return "{$this->glr_dpn}. {$this->name}.{$this->glr_blk}";
+            return "{$this->glr_dpn}. {$this->name}.{$this->glr_blkg}";
         } else
         {
             return "{$this->name}";

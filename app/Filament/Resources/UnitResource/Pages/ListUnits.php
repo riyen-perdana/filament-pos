@@ -32,12 +32,12 @@ class ListUnits extends ListRecords
                 ->badgeColor('info'),
             'Aktif' => Tab::make()
                 ->modifyQueryUsing(fn(Builder $query) => $query->where('is_aktif', 'Y'))
-                ->badge(Unit::where('is_aktif', 'Y')->count())
+                ->badge($this->getModel()::where('is_aktif', 'Y')->count())
                 ->icon('heroicon-o-check-circle')
                 ->badgeColor('success'),
             'Tidak Aktif' => Tab::make()
                 ->modifyQueryUsing(fn(Builder $query) => $query->where('is_aktif', 'N'))
-                ->badge(Unit::where('is_aktif', 'N')->count())
+                ->badge($this->getModel()::where('is_aktif', 'N')->count())
                 ->icon('heroicon-o-x-circle')
                 ->badgeColor('warning'),
         ];
