@@ -25,7 +25,7 @@ class User extends Authenticatable
         'no_hp',
         'password',
         'glr_dpn',
-        'glr_blkgg',
+        'glr_blkg',
         'is_aktif',
         'jabatan_id',
         'unit_id',

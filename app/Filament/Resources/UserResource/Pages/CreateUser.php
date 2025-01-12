@@ -43,6 +43,6 @@ class CreateUser extends CreateRecord
         return Notification::make()
             ->success()
             ->title('Sukses')
-            ->body('Data Unit Berhasil Ditambahkan');
+            ->body('Data Pengguna Berhasil Ditambahkan');
     }
 }

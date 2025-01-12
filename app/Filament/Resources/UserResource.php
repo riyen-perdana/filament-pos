@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use Carbon\Carbon;
 use Filament\Forms;
 use App\Models\User;
 use Filament\Tables;
@@ -52,21 +53,40 @@ class UserResource extends Resource
                         'maxLength' => 'Kolom Nama ASN Maksimal 255 Karakter',
                     ]),
                 Forms\Components\TextInput::make('glr_dpn')
-                    ->required()
                     ->maxLength(255)
                     ->label('Gelar Depan')
                     ->validationMessages([
-                        'required' => 'Kolom Gelar Depan ASN Harus Diisi',
                         'maxLength' => 'Kolom Gelar Depan ASN Maksimal 255 Karakter',
                     ]),
                 Forms\Components\TextInput::make('glr_blkg')
-                    ->required()
                     ->maxLength(255)
                     ->label('Gelar Belakang')
                     ->validationMessages([
-                        'required' => 'Kolom Gelar Belakang ASN Harus Diisi',
                         'maxLength' => 'Kolom Gelar Belakang ASN Maksimal 255 Karakter',
                     ]),
+                Forms\Components\TextInput::make('password')
+                    ->required()
+                    ->password()
+                    ->label('Kata Kunci')
+                    ->maxLength(255)
+                    ->validationMessages([
+                        'required' => 'Kolom Kata Kunci Harus Diisi',
+                        'maxLength' => 'Kolom Kata Kunci Maksimal 255 Karakter',
+                    ])
+                    ->hiddenOn('edit'),
+                Forms\Components\TextInput::make('password_confirmation')
+                    ->required()
+                    ->password()
+                    ->label('Konfirmasi Kata Kunci')
+                    ->maxLength(255)
+                    ->same('password')
+                    ->dehydrated(false)
+                    ->validationMessages([
+                        'required' => 'Kolom Kata Kunci Harus Diisi',
+                        'maxLength' => 'Kolom Kata Kunci Maksimal 255 Karakter',
+                        'same' => 'Kolom Konfirmasi Kata Kunci Harus Sama Dengan Kata Kunci'
+                    ])
+                    ->hiddenOn('edit'),
                 Forms\Components\TextInput::make('email')
                     ->required()
                     ->email()
@@ -101,14 +121,39 @@ class UserResource extends Resource
                             ->modalCancelAction(fn (StaticAction $action) => $action->label('Batal')->icon('heroicon-o-x-mark')->color('danger'))
                             ->closeModalByClickingAway(false)
                             ->modalAutofocus(false)
-                    ),
+                    )
+                    ->placeholder('Pilih Jabatan Terkait'),
                 Forms\Components\Select::make('unit_id')
                     ->required()
                     ->label('Unit')
                     ->relationship('Unit', 'unit_nama')
                     ->getOptionLabelFromRecordUsing(fn (Model $record) => "$record->unit_nama")
                     ->searchable()
-                    ->preload(),
+                    ->preload()
+                    ->placeholder('Pilih Unit Terkait')
+                    ->createOptionForm(
+                        UnitResource::getCustomUnitForm()
+                    )
+                    ->createOptionAction(fn(Actions\Action $action) => 
+                        $action
+                            ->modalHeading('Tambah Unit')
+                            ->modalFooterActionsAlignment('end')
+                            ->modalSubmitAction(fn (StaticAction $action) => $action->label('Tambah')->icon('heroicon-o-plus')->color('success'))
+                            ->modalCancelAction(fn (StaticAction $action) => $action->label('Batal')->icon('heroicon-o-x-mark')->color('danger'))
+                            ->closeModalByClickingAway(false)
+                            ->modalAutofocus(false)
+                    ),
+                Forms\Components\Select::make('is_aktif')
+                    ->required()
+                    ->label('Status')
+                    ->placeholder('Pilih Status')
+                    ->options([
+                        'Y' => 'Aktif',
+                        'N' => 'Tidak Aktif'
+                    ])
+                    ->validationMessages([
+                        'required' => 'Kolom Status Harus Diisi',
+                    ]),
             ]);
     }
 
@@ -130,10 +175,20 @@ class UserResource extends Resource
                     ->description(
                         fn (User $record): string => $record->email
                     ),
-                Tables\Columns\TextColumn::make('full_nm_user')
+                Tables\Columns\TextColumn::make('name')
                     ->label('Nama ASN')
                     ->searchable()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('glr_dpn')
+                    ->label('Gelar Depan')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('glr_blkg')
+                    ->label('Gelar Belakang')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('no_hp')
                     ->label('No. Handphone')
                     ->searchable()
@@ -147,6 +202,18 @@ class UserResource extends Resource
                     ->label('Unit')
                     ->searchable()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->label('Tanggal Dibuat')
+                    ->searchable()
+                    ->sortable()
+                    ->formatStateUsing(fn (string $state): string => Carbon::parse($state)->format('d F Y H:i:s'))
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('updated_at')
+                    ->label('Tanggal Diubah')
+                    ->searchable()
+                    ->sortable()
+                    ->formatStateUsing(fn (string $state): string => Carbon::parse($state)->format('d F Y H:i:s'))
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('is_aktif')
                     ->label('Status')
                     ->searchable()
@@ -158,8 +225,10 @@ class UserResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()->label('Ubah'),
                 Tables\Actions\DeleteAction::make()
+                    ->label('Hapus')
+                    ->requiresConfirmation()
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

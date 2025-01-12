@@ -29,37 +29,7 @@ class UnitResource extends Resource
     public static function form(Form $form): Form
     {
         return $form
-            ->schema([
-                Forms\Components\TextInput::make('unit_nama')
-                    ->autofocus()
-                    ->required()
-                    ->unique(ignoreRecord: true)
-                    ->label('Nama Unit')
-                    ->live(onBlur: true)
-                    ->afterStateUpdated(fn(Set $set, ?string $state) => $set('unit_slug', Str::slug($state)))
-                    ->validationMessages([
-                        'required' => 'Kolom Nama Unit Harus Diisi',
-                        'unique' => 'Kolom Nama Unit Sudah Digunakan, Isikan Yang Lain'
-                    ]),
-                Forms\Components\TextInput::make('unit_slug')
-                    ->readOnly(true)
-                    ->unique(ignoreRecord: true)
-                    ->label('Slug')
-                    ->validationMessages([
-                        'unique' => 'Kolom Nama Unit Sudah Digunakan, Isikan Yang Lain'
-                    ]),
-                Forms\Components\Select::make('is_aktif')
-                    ->required()
-                    ->label('Status Unit')
-                    ->placeholder('Pilih Status Unit')
-                    ->options([
-                        'Y' => 'Aktif',
-                        'N' => 'Tidak Aktif'
-                    ])
-                    ->validationMessages([
-                        'required' => 'Kolom Status Unit Harus Diisi'
-                    ])
-            ]);
+            ->schema(self::getCustomUnitForm());
     }
 
     public static function table(Table $table): Table
@@ -91,7 +61,7 @@ class UnitResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make()
-                ->label('Hapus')
+                    ->label('Hapus')
                     ->requiresConfirmation()
                     ->successNotification(
                         Notification::make()
@@ -139,5 +109,40 @@ class UnitResource extends Resource
     public static function getNavigationBadgeColor(): ?string
     {
         return static::getModel()::count() > 0 ? 'success' : 'danger';
+    }
+
+    public static function getCustomUnitForm()
+    {
+        return [
+            Forms\Components\TextInput::make('unit_nama')
+                ->autofocus()
+                ->required()
+                ->unique(ignoreRecord: true)
+                ->label('Nama Unit')
+                ->live(onBlur: true)
+                ->afterStateUpdated(fn(Set $set, ?string $state) => $set('unit_slug', Str::slug($state)))
+                ->validationMessages([
+                    'required' => 'Kolom Nama Unit Harus Diisi',
+                    'unique' => 'Kolom Nama Unit Sudah Digunakan, Isikan Yang Lain'
+                ]),
+            Forms\Components\TextInput::make('unit_slug')
+                ->readOnly(true)
+                ->unique(ignoreRecord: true)
+                ->label('Slug')
+                ->validationMessages([
+                    'unique' => 'Kolom Nama Unit Sudah Digunakan, Isikan Yang Lain'
+                ]),
+            Forms\Components\Select::make('is_aktif')
+                ->required()
+                ->label('Status Unit')
+                ->placeholder('Pilih Status Unit')
+                ->options([
+                    'Y' => 'Aktif',
+                    'N' => 'Tidak Aktif'
+                ])
+                ->validationMessages([
+                    'required' => 'Kolom Status Unit Harus Diisi'
+                ])
+        ];
     }
 }
