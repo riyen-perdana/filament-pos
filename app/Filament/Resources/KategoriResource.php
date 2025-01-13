@@ -27,7 +27,7 @@ class KategoriResource extends Resource
 {
     protected static ?string $model = Kategori::class;
     protected static ?string $navigationIcon = 'heroicon-o-circle-stack';
-    protected static ?string $navigationGroup = 'Master Data';
+    protected static ?string $navigationGroup = 'Badan Layanan Umum';
     protected static ?string $navigationLabel = 'Kategori';
     protected static ?string $pluralModelLabel = 'Kategori';
     protected static ?string $slug = 'kategori';
