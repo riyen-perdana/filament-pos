@@ -36,32 +36,7 @@ class KategoriResource extends Resource
     public static function form(Form $form): Form
     {
         return $form
-            ->schema([
-                Forms\Components\TextInput::make('kategori_nama')
-                    ->autofocus()
-                    ->required()
-                    ->unique(ignoreRecord: true)
-                    ->label('Nama Kategori')
-                    ->live(onBlur: true)
-                    ->afterStateUpdated(fn(Set $set, ?string $state) => $set('kategori_slug', Str::slug($state)))
-                    ->validationMessages([
-                        'required' => 'Kolom Nama Kategori Harus Diisi',
-                        'unique' => 'Kolom Nama Kategori Sudah Digunakan, Isikan Yang Lain'
-                    ]),
-                Forms\Components\TextInput::make('kategori_slug')
-                    ->readOnly(true),
-                Forms\Components\Select::make('is_aktif')
-                    ->required()
-                    ->placeholder('Pilih Status Kategori')
-                    ->label('Status Kategori')
-                    ->options([
-                        'Y' => 'Aktif',
-                        'N' => 'Tidak Aktif'
-                    ])
-                    ->validationMessages([
-                        'required' => 'Kolom Status Kategori Harus Diisi',
-                    ])
-            ]);
+            ->schema(self::getCustomKategoriForm());
     }
 
     public static function table(Table $table): Table
@@ -156,5 +131,34 @@ class KategoriResource extends Resource
     {
         return static::getModel()::count() > 0 ? 'success' : 'danger';
     }
-    
+
+    public static function getCustomKategoriForm(): array
+    {
+        return [
+            Forms\Components\TextInput::make('kategori_nama')
+                ->autofocus()
+                ->required()
+                ->unique(ignoreRecord: true)
+                ->label('Nama Kategori')
+                ->live(onBlur: true)
+                ->afterStateUpdated(fn(Set $set, ?string $state) => $set('kategori_slug', Str::slug($state)))
+                ->validationMessages([
+                    'required' => 'Kolom Nama Kategori Harus Diisi',
+                    'unique' => 'Kolom Nama Kategori Sudah Digunakan, Isikan Yang Lain'
+                ]),
+            Forms\Components\TextInput::make('kategori_slug')
+                ->readOnly(true),
+            Forms\Components\Select::make('is_aktif')
+                ->required()
+                ->placeholder('Pilih Status Kategori')
+                ->label('Status Kategori')
+                ->options([
+                    'Y' => 'Aktif',
+                    'N' => 'Tidak Aktif'
+                ])
+                ->validationMessages([
+                    'required' => 'Kolom Status Kategori Harus Diisi',
+                ])
+        ];
+    }
 }

@@ -3,8 +3,9 @@
 namespace App\Models;
 
 use App\Enums\IsAktif;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Asset extends Model
 {
@@ -17,6 +18,7 @@ class Asset extends Model
         'unit_id',
         'asset_harga',
         'asset_stok',
+        'jenis_asset',
         'is_share',
         'is_aktif'
     ];
@@ -31,5 +33,15 @@ class Asset extends Model
             get: fn ($value) => ucwords($value),
             set: fn ($value) => strtolower($value)
         );
+    }
+
+    public function kategori() : BelongsTo
+    {
+        return $this->belongsTo(Kategori::class, 'kategori_id');
+    }
+
+    public function unit() : BelongsTo
+    {
+        return $this->belongsTo(Unit::class, 'unit_id');
     }
 }

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\IsAktif;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Kategori extends Model
 {
@@ -18,5 +19,10 @@ class Kategori extends Model
             get: fn ($value) => ucwords($value),
             set: fn ($value) => strtolower($value)
         );
+    }
+
+    public function asset() : HasMany
+    {
+        return $this->hasMany(Asset::class);
     }
 }

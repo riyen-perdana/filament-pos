@@ -11,15 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('assets', function (Blueprint $table) {
+        Schema::create('asset', function (Blueprint $table) {
             $table->id();
             $table->string('asset_kode')->unique();
             $table->string('asset_nama');
-            $table->text('asset_deskripsi');
+            $table->text('asset_deskripsi')->nullable();
             $table->foreignId('kategori_id')->constrained('kategori')->onDelete('cascade');
             $table->foreignId('unit_id')->constrained('unit')->onDelete('cascade');
             $table->bigInteger('asset_harga');
             $table->integer('asset_stok');
+            $table->enum('jenis_asset',['Barang','Jasa'])->default('Barang');
             $table->enum('is_share',['Y','N'])->default('N');
             $table->enum('is_aktif', ['Y', 'N'])->default('Y');
             $table->timestamps();
