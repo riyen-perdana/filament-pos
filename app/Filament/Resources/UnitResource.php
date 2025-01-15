@@ -48,6 +48,12 @@ class UnitResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->width('90%'),
+                Tables\Columns\TextColumn::make('asset_count')
+                    ->label('Layanan Asset')
+                    ->sortable()
+                    ->counts('asset')
+                    ->badge()
+                    ->color('gray'),
                 Tables\Columns\TextColumn::make('is_aktif')
                     ->label('Status Unit')
                     ->searchable()

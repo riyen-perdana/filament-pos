@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use App\Enums\IsAktif;
 use Filament\Forms;
 use Filament\Tables;
+use App\Enums\IsAktif;
 use Filament\Forms\Set;
 use App\Models\Kategori;
 use Filament\Forms\Form;
@@ -14,14 +14,16 @@ use Filament\Resources\Resource;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Filters\Filter;
 use Filament\Forms\Components\Select;
+use Filament\Support\Enums\Alignment;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\Tabs\Tab;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Forms\Components\CheckboxList;
 use App\Filament\Resources\KategoriResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\KategoriResource\RelationManagers;
-use Filament\Forms\Components\Checkbox;
-use Filament\Forms\Components\CheckboxList;
 
 class KategoriResource extends Resource
 {
@@ -55,6 +57,13 @@ class KategoriResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->width('90%'),
+                Tables\Columns\TextColumn::make('asset_count')
+                    ->label('Layanan Asset')
+                    ->sortable()
+                    ->counts('asset')
+                    ->badge()
+                    ->color('gray'),
+                    // ->alignment(Alignment::Center),
                 Tables\Columns\TextColumn::make('is_aktif')
                     ->label('Status Kategori')
                     ->searchable()
@@ -62,23 +71,6 @@ class KategoriResource extends Resource
                     ->formatStateUsing(fn($record) => $record->is_aktif->value == 'Y' ? 'Aktif' : 'Tidak Aktif')
                     ->color(fn($record) => $record->is_aktif->value == 'Y' ? 'success' : 'danger')
             ])
-            // ->filters([
-            //     Filter::make('filter')
-            //         ->form([
-            //             Select::make('is_aktif')
-            //                 ->options([
-            //                     'Y' => 'Aktif',
-            //                     'N' => 'Tidak Aktif'
-            //                 ])
-            //                 ->label('Status Kategori')
-            //         ])
-            //         ->query(function (Builder $query, array $data) {
-            //             return $query->when(
-            //                 $data['is_aktif'],
-            //                     fn(Builder $query) => $query->where('is_aktif', $data['is_aktif'])
-            //             );
-            //         })
-            // ])
             ->actions([
                 Tables\Actions\EditAction::make()->label('Ubah'),
                 Tables\Actions\DeleteAction::make()

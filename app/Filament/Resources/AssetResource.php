@@ -55,14 +55,13 @@ class AssetResource extends Resource
                 Tables\Columns\TextColumn::make('asset_kode')
                     ->label('Kode Layanan Asset')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('asset_nama')
                     ->label('Nama Layanan Asset')
                     ->searchable()
                     ->sortable()
-                    ->description(
-                        fn (Asset $record): string => $record->asset_deskripsi ? $record->asset_deskripsi : '-'
-                    ),
+                    ->wrap(),
                 Tables\Columns\TextColumn::make('kategori.kategori_nama')
                     ->label('Kategori')
                     ->searchable()
@@ -71,12 +70,14 @@ class AssetResource extends Resource
                 Tables\Columns\TextColumn::make('unit.unit_nama')
                     ->label('Unit')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->wrap(),
                 Tables\Columns\TextColumn::make('asset_harga')
                     ->label('Tarif Layanan')
                     ->searchable()
                     ->sortable()
-                    ->money('Rp.', true),
+                    ->money('Rp.', true)
+                    ->alignRight(true),
                 Tables\Columns\TextColumn::make('asset_stok')
                     ->label('Stok')
                     ->searchable()
@@ -109,13 +110,16 @@ class AssetResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()->label('Ubah'),
+                Tables\Actions\DeleteAction::make()
+                    ->label('Hapus'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->defaultSort('unit.unit_nama', 'asc');
     }
 
     public static function getRelations(): array

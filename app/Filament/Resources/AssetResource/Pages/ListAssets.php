@@ -14,7 +14,7 @@ class ListAssets extends ListRecords
     {
         return [
             Actions\CreateAction::make()
-                ->label('Tambah Asset')
+                ->label('Tambah Layanan')
                 ->color('success')
                 ->icon('heroicon-s-plus'),
         ];
