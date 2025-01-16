@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\IsAktif;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Asset extends Model
@@ -43,5 +44,10 @@ class Asset extends Model
     public function unit() : BelongsTo
     {
         return $this->belongsTo(Unit::class, 'unit_id');
+    }
+
+    public function transaksiDetail() : HasMany
+    {
+        return $this->hasMany(TransaksiDetail::class);
     }
 }
