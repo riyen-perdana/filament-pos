@@ -63,6 +63,7 @@ class AdminPanelProvider extends PanelProvider
                 // This is the view that will be rendered
                 fn () => view('customFooter'),
             )
-            ->favicon('https://id.uin-suska.ac.id/logo-uin-suska.ico');
+            ->favicon('https://id.uin-suska.ac.id/logo-uin-suska.ico')
+            ->spa();
     }
 }
