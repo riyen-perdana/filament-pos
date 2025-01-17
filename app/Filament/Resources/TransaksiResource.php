@@ -11,7 +11,9 @@ use Filament\Forms\Form;
 use App\Models\Transaksi;
 use Filament\Tables\Table;
 use Filament\Support\RawJs;
+use Filament\Actions\Action;
 use Filament\Resources\Resource;
+use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Tabs\Tab;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
@@ -64,7 +66,9 @@ class TransaksiResource extends Resource
                                     ->numeric()
                                     ->label('Total Transaksi')
                                     ->default(0)
-                                    // ->readOnly()
+                                    ->readOnly()
+                                    ->prefix('Rp ')
+                                    ->mask(RawJs::make('money')),
                             ])
                             ->columns(2),
                         Forms\Components\Section::make('Detail Transaksi')
@@ -75,21 +79,22 @@ class TransaksiResource extends Resource
                                     ->defaultItems(0)
                                     ->addActionLabel('Tambah Transaksi')
                                     ->schema([
-                                        Forms\Components\Select::make('asset_id')
+                                        Forms\Components\Select::make('id')
                                             ->required()
                                             ->live()
                                             ->preload()
                                             ->placeholder('Pilih Asset')
                                             ->searchable()
-                                            ->relationship('asset','asset_nama')
+                                            ->relationship('asset', 'asset_nama')
                                             ->label('Asset')
                                             ->getOptionLabelFromRecordUsing(fn(Model $record) => "$record->asset_nama")
                                             ->columnSpan(2)
                                             ->afterStateUpdated(
-                                                function (Set $set, ?int $state) {
-                                                    $harga = Asset::where('id', $state)->first();
-                                                    // dd($harga->asset_harga);
-                                                    return $set('harga', $harga->asset_harga);
+                                                function (Set $set, Get $get, ?int $state) {
+                                                    if ($state) {
+                                                        $harga = Asset::where('id', $state)->first();
+                                                        $set('harga', $harga->asset_harga);
+                                                    }
                                                 }
                                             ),
                                         Forms\Components\TextInput::make('jumlah')
@@ -103,7 +108,6 @@ class TransaksiResource extends Resource
                                                 // fn(Set $set, Get $get, ?int $state) => $set('Total', $state * $get('harga')); $set
                                                 function (Set $set, Get $get, ?int $state) {
                                                     $set('Total', $state * $get('harga'));
-                                                    $set ('transaksi_total', 100000);
                                                 }
                                             ),
                                         Forms\Components\TextInput::make('harga')
@@ -120,8 +124,21 @@ class TransaksiResource extends Resource
                                     ])
                                     ->columns(5)
                                     ->columnSpanFull()
+                                    ->afterStateUpdated(
+                                        function (Get $get, Set $set) {
+                                            self::updateTotal($get, $set);
+                                        }
+                                    )
                             ])
-                            ->live(),
+                            ->live()
+                            ->afterStateUpdated(
+                                function (Get $get, Set $set) {
+                                    self::updateTotal($get, $set);
+                                }
+                            )
+                        // ->DeleteAction::make(
+                        //     fn(Action $action) => $action->after(fn(Get $get, Set $set) => self::updateTotal($get, $set)),
+                        // )
                     ])
             ])
             ->columns(1);
@@ -176,10 +193,10 @@ class TransaksiResource extends Resource
         return static::getModel()::count() > 0 ? 'success' : 'danger';
     }
 
-    public static function updateTotal(Get $get, Set $set) : void
+    public static function updateTotal(Get $get, Set $set): void
     {
-        $transaksi = collect($get('transaksiDetail'))->filter(fn($item) => !empty($item['asset_id']) && !empty($item['jumlah']));
-        $set('transaksi_total', $transaksi->sum('Total'));
-
+        $assets = collect($get('transaksiDetail'))->filter(fn($item) => !empty($item['id']) && !empty($item['jumlah']));
+        $prices = $assets->map(fn($item) => $item['harga'] * $item['jumlah']);
+        $set('transaksi_total', number_format($prices->sum(), 0, ',', '.'));
     }
 }
